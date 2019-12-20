@@ -5,10 +5,17 @@ import {
     Text,
     TouchableHighlight,
     View,
-    NativeModules,
+    Platform
 } from 'react-native';
-
 import TouchID from 'react-native-touch-id';
+
+
+const isAndroid = Platform.OS === 'android';
+let authenticationReason = '解锁应用';
+if(isAndroid){
+    authenticationReason = null;
+}
+
 
 export default class BiometricsExample extends Component<{}> {
     constructor(props) {
@@ -18,13 +25,27 @@ export default class BiometricsExample extends Component<{}> {
         };
     }
 
+
+
+
     componentDidMount() {
         TouchID.isSupported()
             .then(biometryType => {
-                console.log("biometryType:",biometryType);
+                console.log('biometryType:', biometryType);
                 this.setState({biometryType});
             });
     }
+
+    authenticate() {
+        return TouchID.authenticate()
+            .then(success => {
+                alert('Authenticated Successfully');
+            })
+            .catch(error => {
+                console.log(error);
+                alert(error.message);
+            });
+    };
 
     render() {
         return (
@@ -34,7 +55,7 @@ export default class BiometricsExample extends Component<{}> {
                 </Text>
 
                 <Text style={styles.instructions}>
-                    设备支持类型：{this.state.biometryType}
+                    {`设备支持类型：${this.state.biometryType}`}
                 </Text>
                 <TouchableHighlight
                     style={styles.btn}
@@ -54,8 +75,35 @@ export default class BiometricsExample extends Component<{}> {
     }
 
     _clickHandler() {
+
+        const optionalConfigObject = {
+            title: '应用解锁', // Android
+            imageColor: '#e00606', // Android
+            imageErrorColor: '#ff0000', // Android
+            sensorDescription: '验证手机已有指纹', // Android
+            sensorErrorDescription: '验证失败', // Android
+            cancelText: '取消', // Android
+            fallbackLabel: '登录密码解锁', // iOS (if empty, then label is hidden)
+            unifiedErrors: false, // use unified error messages (default false)
+            passcodeFallback: false, // iOS - allows the device to fall back to using the passcode, if faceid/touch is not available. this does not mean that if touchid/faceid fails the first few times it will revert to passcode, rather that if the former are not enrolled, then it will use the passcode.
+        };
+
+
         TouchID.isSupported()
-            .then(authenticate)
+            .then((biometryType) => {
+                console.log('click handle:', biometryType);
+
+
+                return TouchID.authenticate(authenticationReason,optionalConfigObject)
+                    .then(success => {
+                        alert('Authenticated Successfully');
+                    })
+                    .catch(error => {
+                        console.log(error);
+                        alert(error.message);
+                    });
+
+            })
             .catch(error => {
                 alert('TouchID not supported');
             });
@@ -103,28 +151,3 @@ const errors = {
     'RCTTouchIDUnknownError': 'Could not authenticate for an unknown reason.',
     'RCTTouchIDNotSupported': 'Device does not support Touch ID.',
 };
-
-function authenticate() {
-    return TouchID.authenticate()
-        .then(success => {
-            alert('Authenticated Successfully');
-        })
-        .catch(error => {
-            console.log(error);
-            alert(error.message);
-        });
-}
-
-function passcodeAuth() {
-    return PasscodeAuth.isSupported()
-        .then(() => {
-            return PasscodeAuth.authenticate();
-        })
-        .then(success => {
-            alert('Authenticated Successfully');
-        })
-        .catch(error => {
-            console.log(error);
-            alert(error.message);
-        });
-}
