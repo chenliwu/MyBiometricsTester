@@ -1,18 +1,22 @@
 'use strict';
 import React, {Component} from 'react';
 import {
+    Alert,
     StyleSheet,
     Text,
     TouchableHighlight,
     View,
-    Platform
+    Platform,
+    Keyboard,
 } from 'react-native';
 import TouchID from 'react-native-touch-id';
+
+import BiometricsUtils from './BiometricsUtils';
 
 
 const isAndroid = Platform.OS === 'android';
 let authenticationReason = '解锁应用';
-if(isAndroid){
+if (isAndroid) {
     authenticationReason = null;
 }
 
@@ -22,10 +26,9 @@ export default class BiometricsExample extends Component<{}> {
         super(props);
         this.state = {
             biometryType: null,
+            txtPassword: '',
         };
     }
-
-
 
 
     componentDidMount() {
@@ -57,6 +60,21 @@ export default class BiometricsExample extends Component<{}> {
                 <Text style={styles.instructions}>
                     {`设备支持类型：${this.state.biometryType}`}
                 </Text>
+
+                <TouchableHighlight
+                    style={styles.btn}
+                    onPress={this.passwordToUnlock}
+                    underlayColor="#0380BE"
+                    activeOpacity={1}
+                >
+                    <Text style={{
+                        color: '#fff',
+                        fontWeight: '600',
+                    }}>
+                        密码解锁
+                    </Text>
+                </TouchableHighlight>
+
                 <TouchableHighlight
                     style={styles.btn}
                     onPress={this._clickHandler}
@@ -70,9 +88,44 @@ export default class BiometricsExample extends Component<{}> {
                         {`Authenticate with ${this.state.biometryType}`}
                     </Text>
                 </TouchableHighlight>
+
+
             </View>
         );
     }
+
+
+    passwordToUnlock = () => {
+        Alert.prompt(
+            '密码解锁',
+            '请输入登录密码',
+            [
+                {
+                    text: '取消', onPress: function () {
+                    },
+                },
+                {
+                    text: '确认', onPress: (text) => {
+                        this.setState({
+                            txtPassword: text,
+                        });
+                        if (!this.state.txtPassword) {
+                            alert('温馨提示', '请输入密码！');
+                            return;
+                        }
+                        Keyboard.dismiss();
+                        alert('输入的密码为：' + this.state.txtPassword);
+                        this.setState({
+                            txtPassword: '',
+                        });
+                    },
+                },
+            ],
+            'secure-text',
+            this.state.txtPassword,
+            'default',
+        );
+    };
 
     _clickHandler() {
 
@@ -94,13 +147,33 @@ export default class BiometricsExample extends Component<{}> {
                 console.log('click handle:', biometryType);
 
 
-                return TouchID.authenticate(authenticationReason,optionalConfigObject)
+                return TouchID.authenticate(authenticationReason, optionalConfigObject)
                     .then(success => {
                         alert('Authenticated Successfully');
                     })
                     .catch(error => {
                         console.log(error);
-                        alert(error.message);
+                        console.log('authenticate.error', error);
+                        console.log('authenticate.error.details', error.details);
+                        let msg = `code:${error.code},name:${error.name},message:${error.message},details:${error.details}`;
+                        // alert(msg);
+                        if (isAndroid) {
+                            if (error.code != BiometricsUtils.ANDROID_CODE_OPERATION_CANCEL) {
+                                msg = BiometricsUtils.getAndroidErrorDescription(error);
+                            }else{
+                                msg = "取消操作";
+                            }
+                        } else {
+                            if(error.name == 'LAErrorUserFallback'){
+                                msg = '输入密码事件';
+                            } else if(error.name == 'LAErrorTouchIDNotEnrolled'){
+                                msg = '设备未录入指纹/未录入人脸数据！';
+                            }
+                        }
+                        alert(msg);
+                        // if(error.message == errors.LAErrorUserFallback){
+                        //     this.passwordToUnlock();
+                        // }
                     });
 
             })
@@ -108,6 +181,14 @@ export default class BiometricsExample extends Component<{}> {
                 alert('TouchID not supported');
             });
     }
+
+    handleAndroidError = (error) => {
+        let {code} = error;
+        if (code) {
+
+        }
+    };
+
 }
 
 const styles = StyleSheet.create({
@@ -129,15 +210,7 @@ const styles = StyleSheet.create({
         fontSize: 13,
         textAlign: 'center',
     },
-    btn: {
-        borderRadius: 3,
-        marginTop: 200,
-        paddingTop: 15,
-        paddingBottom: 15,
-        paddingLeft: 15,
-        paddingRight: 15,
-        backgroundColor: '#0391D7',
-    },
+    btn: {},
 });
 
 const errors = {
