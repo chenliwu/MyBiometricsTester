@@ -68,7 +68,6 @@ export default class BiometricsExample extends Component<{}> {
                     activeOpacity={1}
                 >
                     <Text style={{
-                        color: '#fff',
                         fontWeight: '600',
                     }}>
                         密码解锁
@@ -82,10 +81,9 @@ export default class BiometricsExample extends Component<{}> {
                     activeOpacity={1}
                 >
                     <Text style={{
-                        color: '#fff',
                         fontWeight: '600',
                     }}>
-                        {`Authenticate with ${this.state.biometryType}`}
+                       点击进行生物识别
                     </Text>
                 </TouchableHighlight>
 

@@ -5058,6 +5058,9 @@ react-is@^16.8.1, react-is@^16.8.4, react-is@^16.9.0:
   resolved "https://registry.npm.taobao.org/react-is/download/react-is-16.12.0.tgz?cache=0&sync_timestamp=1576681846056&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Freact-is%2Fdownload%2Freact-is-16.12.0.tgz#2cc0fe0fba742d97fd527c42a13bec4eeb06241c"
   integrity sha1-LMD+D7p0LZf9UnxCoTvsTusGJBw=
 
+"react-native-biometrics-lib@file:../../BytterProjects/react-native-biometrics-lib":
+  version "1.0.0"
+
 react-native-touch-id@^4.4.1:
   version "4.4.1"
   resolved "https://registry.npm.taobao.org/react-native-touch-id/download/react-native-touch-id-4.4.1.tgz#8b1bb2d04c30bac36bb9696d2d723e719c4a8b08"

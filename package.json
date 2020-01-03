@@ -12,7 +12,8 @@
   "dependencies": {
     "react": "16.9.0",
     "react-native": "0.61.5",
-    "react-native-touch-id": "^4.4.1"
+    "react-native-touch-id": "^4.4.1",
+    "react-native-biometrics-lib": "file:../../BytterProjects/react-native-biometrics-lib"
   },
   "devDependencies": {
     "@babel/core": "^7.7.7",
